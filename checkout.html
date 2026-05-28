@@ -82,8 +82,10 @@ body { font-family:sans-serif; margin:0; background:#f5f5f5; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+const { createClient } = supabase;
 
-const supabase = window.supabase.createClient(
+const db = createClient(
+
   "https://zozzoqzryejpkbddzoyi.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE"
 );
@@ -213,8 +215,8 @@ async function placeOrder(){
 
         // ✅ INSERT ORDER
         const { data: orderData, error: orderError } =
-          await supabase
-          .from("orders")
+          await db
+.from("orders")
           .insert([{
             restaurant_id: restaurantId,
 
@@ -267,7 +269,7 @@ grand_total: grandTotal,
         }));
 
         const { error: itemError } =
-          await supabase
+          await db
           .from("order_items")
           .insert(itemsToInsert);
 
