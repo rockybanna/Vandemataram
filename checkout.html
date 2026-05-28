@@ -49,7 +49,11 @@ body { font-family:sans-serif; margin:0; background:#f5f5f5; }
 <body>
 
 <div class="header">
-  <div class="title">Checkout</div>
+<div class="title">
+  Checkout
+  <div style="font-size:12px;color:#8bc34a;margin-top:4px;">
+    You saved ₹15 🎉
+  </div>
 </div>
 
 <!-- CART SUMMARY -->
@@ -87,12 +91,22 @@ const supabase = window.supabase.createClient(
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 let total = 0;
+  let deliveryCharge = 20;
+let platformFee = 5;
+let savings = 15;
+
+let grandTotal = 0;
 
 // CALCULATE TOTAL
 cart.forEach(c => {
   total += (c.total || 0) * (c.qty || 1);
 });
+grandTotal = total + deliveryCharge + platformFee - savings;
 
+if(grandTotal < 0){
+  grandTotal = total;
+}
+  
 // RENDER SUMMARY
 document.getElementById("summary").innerHTML =
   cart.map(c => `
@@ -117,10 +131,35 @@ document.getElementById("summary").innerHTML =
     </div>
   `).join("") +
 
-  `<div style="font-weight:bold;margin-top:10px;">
-    Total: ₹${total}
-  </div>`;
+<hr style="margin:10px 0; border:none; border-top:1px solid #eee;">
 
+<div style="display:flex;justify-content:space-between;margin:6px 0;">
+  <span>Item Total</span>
+  <span>₹${total}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;margin:6px 0;">
+  <span>Delivery Fee</span>
+  <span>₹${deliveryCharge}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;margin:6px 0;">
+  <span>Platform Fee</span>
+  <span>₹${platformFee}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;margin:6px 0;color:green;">
+  <span>Savings</span>
+  <span>-₹${savings}</span>
+</div>
+
+<hr style="margin:10px 0; border:none; border-top:1px solid #eee;">
+
+<div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px;">
+  <span>Grand Total</span>
+  <span>₹${grandTotal}</span>
+</div>
+  
 // PLACE ORDER
 async function placeOrder(){
 
@@ -185,11 +224,11 @@ async function placeOrder(){
             lng: lng,
             map_link: mapLink,
 
-            item_total: total,
-            delivery_charge: 0,
-            platform_fee: 0,
-            grand_total: total,
-
+item_total: total,
+delivery_charge: deliveryCharge,
+platform_fee: platformFee,
+grand_total: grandTotal,
+            
             payment_method: "COD",
             payment_status: "pending",
             order_status: "pending"
