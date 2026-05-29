@@ -345,83 +345,34 @@ if(!screenshotFile){
           `https://www.google.com/maps?q=${lat},${lng}`;
 
 const restaurantId = cart[0]?.resId || null;
-        const { data: restaurantData } =
-await db
-.from("restaurants")
-.select("lat,lng")
-.eq("id", restaurantId)
-.single();
-
-const restaurantLat =
-Number(restaurantData.lat);
-
-const restaurantLng =
-Number(restaurantData.lng);
-        function haversineDistance(
-  lat1,
-  lon1,
-  lat2,
-  lon2
-){
-
-  const R = 6371;
-
-  const dLat =
-  (lat2-lat1) * Math.PI/180;
-
-  const dLon =
-  (lon2-lon1) * Math.PI/180;
-
-  const a =
-    Math.sin(dLat/2) *
-    Math.sin(dLat/2)
-    +
-    Math.cos(lat1*Math.PI/180)
-    *
-    Math.cos(lat2*Math.PI/180)
-    *
-    Math.sin(dLon/2)
-    *
-    Math.sin(dLon/2);
-
-  const c =
-  2 * Math.atan2(
-    Math.sqrt(a),
-    Math.sqrt(1-a)
-  );
-
-  return R * c;
-}
-let airDistance =
-haversineDistance(
-  lat,
-  lng,
-  restaurantLat,
-  restaurantLng
+const { data: deliveryData, error: deliveryError } =
+await db.rpc(
+  "calculate_delivery",
+  {
+    p_restaurant_id: restaurantId,
+    p_customer_lat: lat,
+    p_customer_lng: lng
+  }
 );
-        
-let finalDistance = 0;
 
-if(airDistance <= 5){
-  finalDistance =
-  airDistance * 1.5;
-}else{
-  finalDistance =
-  airDistance * 1.3;
+if(deliveryError){
+  console.log(deliveryError);
+  alert("Delivery calculation failed");
+  return;
 }
 
-finalDistance =
-Math.round(finalDistance * 2) / 2;
-        deliveryCharge =
-35 + (Math.max(finalDistance,1.5)-1.5)*10;
-        deliveryCharge =
-Math.round(deliveryCharge);
-        grandTotal =
+const finalDistance =
+deliveryData.distance_km;
+
+deliveryCharge =
+deliveryData.delivery_charge;
+
+grandTotal =
 total +
 deliveryCharge +
 platformFee -
 savings;
-
+        
 const screenshotUrl =
   await uploadPaymentScreenshot(
     screenshotFile
