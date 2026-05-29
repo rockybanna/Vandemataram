@@ -392,14 +392,14 @@ Number(restaurantData.lng);
 
   return R * c;
 }
-        let airDistance =
+let airDistance =
 haversineDistance(
-  customerLat,
-  customerLng,
+  lat,
+  lng,
   restaurantLat,
   restaurantLng
 );
-
+        
 let finalDistance = 0;
 
 if(airDistance <= 5){
@@ -442,8 +442,8 @@ if(!screenshotUrl){
             customer_name: name,
             customer_phone: phone,
             customer_address: address,
-            customer_lat: customerLat,
-            customer_lng: customerLng,
+customer_lat: lat,
+customer_lng: lng,
             map_link: mapLink,
             distance_km: finalDistance,
 
