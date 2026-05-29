@@ -267,7 +267,7 @@ document.getElementById("summary").innerHTML =
         "locationStatus"
       ).innerHTML =
       "✅ Location Captured";
-
+      updateDeliveryCharges();
     },
 
     function(){
@@ -281,6 +281,93 @@ document.getElementById("summary").innerHTML =
 
   );
 
+}
+
+  async function updateDeliveryCharges(){
+
+  if(!customerLat || !customerLng){
+    return;
+  }
+
+  const restaurantId =
+    cart[0]?.resId || null;
+
+  const {
+    data: deliveryData,
+    error: deliveryError
+  } =
+  await db.rpc(
+    "calculate_delivery",
+    {
+      p_restaurant_id: restaurantId,
+      p_customer_lat: customerLat,
+      p_customer_lng: customerLng
+    }
+  );
+
+  if(deliveryError){
+    console.log(deliveryError);
+    return;
+  }
+
+  distanceKm =
+    deliveryData.distance_km;
+
+  deliveryCharge =
+    deliveryData.delivery_charge;
+
+  grandTotal =
+    total +
+    deliveryCharge +
+    platformFee -
+    savings;
+
+  document.getElementById("summary").innerHTML = `
+
+${cart.map(c => `
+<div style="margin-bottom:10px;">
+
+<div style="font-weight:600;">
+${c.name} x${c.qty}
+</div>
+
+<div style="font-weight:bold;margin-top:4px;">
+₹${(c.total || 0) * (c.qty || 1)}
+</div>
+
+</div>
+`).join("")}
+
+<hr>
+
+<div style="display:flex;justify-content:space-between;">
+<span>Item Total</span>
+<span>₹${total}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;">
+<span>Distance</span>
+<span>${distanceKm} km</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;">
+<span>Delivery Fee</span>
+<span>₹${deliveryCharge}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;">
+<span>Platform Fee</span>
+<span>₹${platformFee}</span>
+</div>
+
+<hr>
+
+<div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px;">
+<span>Grand Total</span>
+<span>₹${grandTotal}</span>
+</div>
+
+`;
 }
   
 // PLACE ORDER
