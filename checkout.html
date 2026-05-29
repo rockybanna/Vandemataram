@@ -52,10 +52,11 @@ body { font-family:sans-serif; margin:0; background:#f5f5f5; }
 <div class="title">
   Checkout
   <div style="font-size:12px;color:#8bc34a;margin-top:4px;">
-    You saved ₹15 🎉
+    Delivery charges calculated automatically 📍
   </div>
 </div>
-
+</div>
+  
 <!-- CART SUMMARY -->
 
 <div class="section" id="summary"></div>
@@ -154,9 +155,10 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let total = 0;
   let deliveryCharge = 0;
 let platformFee = 5;
-let savings = 15;
+let savings = 0;
 
 let grandTotal = 0;
+  let distanceKm = 0;
 
   let customerLat = null;
 let customerLng = null;
@@ -361,9 +363,12 @@ if(deliveryError){
   return;
 }
 
-const finalDistance =
+distanceKm =
 deliveryData.distance_km;
 
+const finalDistance =
+distanceKm;
+        
 deliveryCharge =
 deliveryData.delivery_charge;
 
@@ -372,6 +377,36 @@ total +
 deliveryCharge +
 platformFee -
 savings;
+        document.getElementById("summary").innerHTML = `
+
+<div style="display:flex;justify-content:space-between;">
+  <span>Item Total</span>
+  <span>₹${total}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;">
+  <span>Distance</span>
+  <span>${distanceKm} km</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;">
+  <span>Delivery Fee</span>
+  <span>₹${deliveryCharge}</span>
+</div>
+
+<div style="display:flex;justify-content:space-between;">
+  <span>Platform Fee</span>
+  <span>₹${platformFee}</span>
+</div>
+
+<hr>
+
+<div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px;">
+  <span>Grand Total</span>
+  <span>₹${grandTotal}</span>
+</div>
+
+`;
         
 const screenshotUrl =
   await uploadPaymentScreenshot(
