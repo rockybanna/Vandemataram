@@ -75,6 +75,7 @@ body { font-family:sans-serif; margin:0; background:#f5f5f5; }
   <button
   type="button"
   id="locationBtn"
+  onclick="getLocation()"
   class="btn"
   style="margin-top:10px;background:#2196f3;">
   📍 Use Current Location
@@ -157,6 +158,9 @@ let savings = 15;
 
 let grandTotal = 0;
 
+  let customerLat = null;
+let customerLng = null;
+  
   async function uploadPaymentScreenshot(file){
 
   const fileName =
@@ -243,6 +247,39 @@ document.getElementById("summary").innerHTML =
 </div>
 
 `;
+
+  async function getLocation(){
+
+  if(!navigator.geolocation){
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(pos){
+
+      customerLat = pos.coords.latitude;
+      customerLng = pos.coords.longitude;
+
+      document.getElementById(
+        "locationStatus"
+      ).innerHTML =
+      "✅ Location Captured";
+
+    },
+
+    function(){
+
+      document.getElementById(
+        "locationStatus"
+      ).innerHTML =
+      "❌ Location Required";
+
+    }
+
+  );
+
+}
   
 // PLACE ORDER
 async function placeOrder(){
@@ -250,6 +287,13 @@ async function placeOrder(){
   let name = document.getElementById("name").value.trim();
   let phone = document.getElementById("phone").value.trim();
   let address = document.getElementById("address").value.trim();
+
+  if(!customerLat || !customerLng){
+
+  alert("Please allow location access");
+
+  return;
+}
 
   const screenshotFile =
   document.getElementById("paymentScreenshot")
@@ -416,7 +460,9 @@ payment_screenshot:
 
   );
 }
-  
+
+  getLocation();
+
 </script>
 
 </body>
