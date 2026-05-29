@@ -71,6 +71,14 @@ body { font-family:sans-serif; margin:0; background:#f5f5f5; }
 
   <div>Address</div>
   <input id="address" class="input" placeholder="Enter address">
+  <div style="margin-top:15px;">Payment Screenshot</div>
+
+<input
+  type="file"
+  id="paymentScreenshot"
+  class="input"
+  accept="image/*">
+  
 </div>
 
 <!-- BUTTON -->
@@ -98,6 +106,28 @@ let platformFee = 5;
 let savings = 15;
 
 let grandTotal = 0;
+
+  async function uploadPaymentScreenshot(file){
+
+  const fileName =
+    Date.now() + "_" + file.name;
+
+  const { error } = await db.storage
+    .from("payments")
+    .upload(fileName, file);
+
+  if(error){
+    console.log(error);
+    return null;
+  }
+
+  const { data } = db.storage
+    .from("payments")
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
+}
+  
 
 // CALCULATE TOTAL
 cart.forEach(c => {
@@ -171,6 +201,15 @@ async function placeOrder(){
   let phone = document.getElementById("phone").value.trim();
   let address = document.getElementById("address").value.trim();
 
+  const screenshotFile =
+  document.getElementById("paymentScreenshot")
+  .files[0];
+
+if(!screenshotFile){
+  alert("Upload payment screenshot");
+  return;
+}
+
   // ✅ VALIDATION
   if(!name || !phone || !address){
     alert("Please fill all details");
@@ -211,8 +250,18 @@ async function placeOrder(){
         const mapLink =
           `https://www.google.com/maps?q=${lat},${lng}`;
 
-        const restaurantId = cart[0]?.resId || null;
+const restaurantId = cart[0]?.resId || null;
 
+const screenshotUrl =
+  await uploadPaymentScreenshot(
+    screenshotFile
+  );
+
+if(!screenshotUrl){
+  alert("Screenshot upload failed");
+  return;
+}
+        
         // ✅ INSERT ORDER
         const { data: orderData, error: orderError } =
           await db
@@ -233,9 +282,16 @@ delivery_charge: deliveryCharge,
 platform_fee: platformFee,
 grand_total: grandTotal,
             
-            payment_method: "COD",
-            payment_status: "pending",
-            order_status: "pending"
+payment_method: "UPI",
+
+payment_status:
+  "waiting_verification",
+
+order_status:
+  "waiting_verification",
+
+payment_screenshot:
+  screenshotUrl
           }])
           .select();
 
