@@ -443,7 +443,9 @@ await db.rpc(
     p_customer_lng: lng
   }
 );
-
+console.log("RPC RESULT");
+console.log(deliveryData);
+        
 if(deliveryError){
   console.log(deliveryError);
   alert("Delivery calculation failed");
