@@ -155,6 +155,23 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let total = 0;
   let deliveryCharge = 0;
 let platformFee = 5;
+  async function loadSettings(){
+
+  const { data, error } =
+  await db
+  .from("app_settings")
+  .select("platform_fee")
+  .eq("id", 1)
+  .single();
+
+  if(error){
+    console.log(error);
+    return;
+  }
+
+  platformFee =
+  Number(data.platform_fee || 5);
+}
 let savings = 0;
 
 let grandTotal = 0;
@@ -622,8 +639,14 @@ payment_screenshot:
   );
 }
 
+(async () => {
+
+  await loadSettings();
+
   getLocation();
 
+})();
+  
 </script>
 
 </body>
