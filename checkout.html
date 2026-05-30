@@ -292,11 +292,34 @@ document.getElementById("summary").innerHTML =
   const restaurantId =
     cart[0]?.resId || null;
 
-  const {
-    data: deliveryData,
-    error: deliveryError
-  } =
-  await db.rpc(
+try {
+
+const {
+  data: deliveryData,
+  error: deliveryError
+}
+=
+await db.rpc(
+  "calculate_delivery",
+  {
+    p_restaurant_id: restaurantId,
+    p_customer_lat: customerLat,
+    p_customer_lng: customerLng
+  }
+);
+
+console.log("RPC DATA");
+console.log(deliveryData);
+
+console.log("RPC ERROR");
+console.log(deliveryError);
+
+} catch(err){
+
+console.log("RPC CRASH");
+console.log(err);
+
+}
     "calculate_delivery",
     {
       p_restaurant_id: restaurantId,
