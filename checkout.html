@@ -306,23 +306,11 @@ await db.rpc(
   }
 );
 
-if(deliveryError){
+    if(deliveryError){
   console.log(deliveryError);
   return;
 }
-    "calculate_delivery",
-    {
-      p_restaurant_id: restaurantId,
-      p_customer_lat: customerLat,
-      p_customer_lng: customerLng
-    }
-  );
-
-  if(deliveryError){
-    console.log(deliveryError);
-    return;
-  }
-
+    
   distanceKm =
     deliveryData.distance_km;
 
