@@ -452,15 +452,24 @@ if(deliveryError){
   return;
 }
 
+console.log("FULL RPC");
+console.log(deliveryData);
+
 distanceKm =
-deliveryData.distance_km;
+Number(deliveryData.distance_km);
 
 const finalDistance =
 distanceKm;
-        
-deliveryCharge =
-deliveryData.delivery_charge;
 
+deliveryCharge =
+Number(deliveryData.delivery_charge);
+
+console.log("DISTANCE");
+console.log(distanceKm);
+
+console.log("DELIVERY");
+console.log(deliveryCharge);
+        
 grandTotal =
 total +
 deliveryCharge +
