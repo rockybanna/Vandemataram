@@ -292,8 +292,6 @@ document.getElementById("summary").innerHTML =
   const restaurantId =
     cart[0]?.resId || null;
 
-try {
-
 const {
   data: deliveryData,
   error: deliveryError
@@ -308,17 +306,9 @@ await db.rpc(
   }
 );
 
-console.log("RPC DATA");
-console.log(deliveryData);
-
-console.log("RPC ERROR");
-console.log(deliveryError);
-
-} catch(err){
-
-console.log("RPC CRASH");
-console.log(err);
-
+if(deliveryError){
+  console.log(deliveryError);
+  return;
 }
     "calculate_delivery",
     {
