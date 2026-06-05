@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Verify Order</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+img{
+width:100%;
+max-width:500px;
+border-radius:10px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+margin-top:10px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.approve{
+background:#28a745;
+color:white;
+}
+
+.reject{
+background:#dc3545;
+color:white;
+}
+
+textarea{
+width:100%;
+padding:10px;
+box-sizing:border-box;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="order">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+const orderId =
+localStorage.getItem(
+"selectedOrderId"
+);
+
+loadOrder();
+
+async function loadOrder(){
+
+const { data:order } =
+await db
+.from("orders")
+.select("*")
+.eq("id",orderId)
+.single();
+
+const { data:restaurant } =
+await db
+.from("restaurants")
+.select("name")
+.eq(
+"id",
+order.restaurant_id
+)
+.single();
+
+const { data:items } =
+await db
+.from("order_items")
+.select("*")
+.eq(
+"order_id",
+order.id
+);
+
+document.getElementById(
+"order"
+).innerHTML = `
+
+<div class="card">
+
+<h2>${order.order_code}</h2>
+
+<b>Restaurant:</b>
+${restaurant.name}
+<br><br>
+
+<b>Customer:</b>
+${order.customer_name}
+<br>
+
+<b>Phone:</b>
+${order.customer_phone}
+<br>
+
+<b>Address:</b>
+${order.customer_address}
+<br><br>
+
+<b>Distance:</b>
+${order.distance_km} km
+<br>
+
+<b>Delivery:</b>
+₹${order.delivery_charge}
+<br>
+
+<b>Platform Fee:</b>
+₹${order.platform_fee}
+<br>
+
+<b>Grand Total:</b>
+₹${order.grand_total}
+
+</div>
+
+<div class="card">
+
+<h3>Items</h3>
+
+${items.map(i=>`
+<div>
+${i.item_name}
+x${i.quantity}
+- ₹${i.price}
+</div>
+`).join("")}
+
+</div>
+
+<div class="card">
+
+<h3>Payment Screenshot</h3>
+
+<a
+href="${order.payment_screenshot}"
+target="_blank">
+
+<img
+src="${order.payment_screenshot}">
+
+</a>
+
+</div>
+
+<div class="card">
+
+<textarea
+id="reason"
+placeholder="Reason if rejecting"></textarea>
+
+<button
+class="approve"
+onclick="approveOrder()">
+
+Approve Payment
+
+</button>
+
+<button
+class="reject"
+onclick="rejectOrder()">
+
+Reject Payment
+
+</button>
+
+</div>
+
+`;
+
+}
+
+async function approveOrder(){
+
+await db
+.from("orders")
+.update({
+payment_status:"verified",
+order_status:"verified",
+verified_by:"verifier",
+verified_at:new Date()
+})
+.eq("id",orderId);
+
+alert("Approved");
+
+window.location.href =
+"verifier.html";
+
+}
+
+async function rejectOrder(){
+
+const reason =
+document.getElementById(
+"reason"
+).value;
+
+await db
+.from("orders")
+.update({
+payment_status:"rejected",
+order_status:"rejected",
+verified_by:"verifier",
+verified_at:new Date(),
+rejection_reason:reason
+})
+.eq("id",orderId);
+
+alert("Rejected");
+
+window.location.href =
+"verifier.html";
+
+}
+
+</script>
+
+</body>
+</html>
