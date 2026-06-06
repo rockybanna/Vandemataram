@@ -241,12 +241,26 @@ body { margin:0; font-family:sans-serif; background:#f5f5f5; }
 <!-- BOTTOM NAV -->
 
 <div class="bottom">
-  <div>Home</div>
-  <div>Search</div>
-  <div>Orders</div>
-  <div>Profile</div>
+
+  <div onclick="window.location.href='index.html'">
+    Home
+  </div>
+
+  <div onclick="document.getElementById('search').focus()">
+    Search
+  </div>
+
+  <div onclick="window.location.href='customer-history.html'">
+    Orders
+  </div>
+
+  <div onclick="alert('Profile Coming Soon')">
+    Profile
+  </div>
+
 </div>
 
+  
 <script>
 // 🔥 SUPABASE CONFIG
   const SUPABASE_URL = "https://zozzoqzryejpkbddzoyi.supabase.co";
