@@ -55,7 +55,7 @@ const SUPABASE_URL =
 "https://zozzoqzryejpkbddzoyi.supabase.co";
 
 const SUPABASE_ANON_KEY =
-"PASTE SAME KEY";
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
 
 const db =
 supabase.createClient(
@@ -201,15 +201,15 @@ order.payment_status ===
 
 `
 
+<input
+type="file"
+id="newScreenshot"
+accept="image/*"
+>
+
 <button
-onclick="
-alert(
-'Resubmit Screenshot Coming Next'
-)
-">
-
+onclick="resubmitScreenshot()">
 Upload New Screenshot
-
 </button>
 
 `
@@ -223,6 +223,92 @@ Upload New Screenshot
 
 }
 
+  async function resubmitScreenshot(){
+
+const file =
+document.getElementById(
+"newScreenshot"
+).files[0];
+
+if(!file){
+alert("Select screenshot");
+return;
+}
+
+const fileName =
+Date.now() + "_" + file.name;
+
+const { error } =
+await db.storage
+.from("payments")
+.upload(
+fileName,
+file
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+const { data:urlData } =
+db.storage
+.from("payments")
+.getPublicUrl(
+fileName
+);
+
+const orderId =
+localStorage.getItem(
+"selectedOrderId"
+);
+
+const { data:order } =
+await db
+.from("orders")
+.select(
+"resubmission_count"
+)
+.eq(
+"id",
+orderId
+)
+.single();
+
+await db
+.from("orders")
+.update({
+
+payment_screenshot:
+urlData.publicUrl,
+
+payment_status:
+"waiting_verification",
+
+order_status:
+"waiting_verification",
+
+rejection_reason:
+null,
+
+resubmission_count:
+(order.resubmission_count || 0) + 1
+
+})
+.eq(
+"id",
+orderId
+);
+
+alert(
+"Screenshot Submitted Again"
+);
+
+window.location.href =
+"customer-history.html";
+
+}
+  
 </script>
 
 </body>
