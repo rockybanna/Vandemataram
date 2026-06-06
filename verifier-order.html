@@ -205,7 +205,7 @@ Approve Payment
 class="reject"
 onclick="rejectOrder()">
 
-Reject Payment
+Payment Issue
 
 </button>
 
@@ -239,26 +239,47 @@ async function rejectOrder(){
 const reason =
 document.getElementById(
 "reason"
-).value;
+).value.trim();
+
+if(!reason){
+
+alert(
+"Reason is required"
+);
+
+return;
+
+}
 
 await db
 .from("orders")
 .update({
-payment_status:"rejected",
-order_status:"rejected",
-verified_by:"verifier",
-verified_at:new Date(),
-rejection_reason:reason
-})
-.eq("id",orderId);
 
-alert("Rejected");
+payment_status:"payment_issue",
+
+order_status:"payment_issue",
+
+verified_by:"verifier",
+
+verified_at:new Date(),
+
+rejection_reason:reason
+
+})
+.eq(
+"id",
+orderId
+);
+
+alert(
+"Marked as Payment Issue"
+);
 
 window.location.href =
 "verifier.html";
 
 }
-
+  
 </script>
 
 </body>
