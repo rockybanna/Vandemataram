@@ -86,7 +86,15 @@ document.getElementById(
 ).innerHTML =
 data.map(order=>`
 
-<div class="card">
+<div class="card"
+onclick="
+localStorage.setItem(
+'selectedOrderId',
+'${order.id}'
+);
+window.location.href=
+'customer-order.html';
+">
 
 <div class="code">
 ${order.order_code}
