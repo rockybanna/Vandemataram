@@ -104,11 +104,11 @@ restaurantId
 "payment_status",
 "verified"
 )
-.eq(
+.in(
 "restaurant_status",
-"pending"
+["pending","accepted"]
 )
-.order(
+  .order(
 "created_at",
 { ascending:false }
 );
