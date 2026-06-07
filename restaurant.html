@@ -136,7 +136,17 @@ data.map(order=>`
 
 <div class="card">
 
-<div class="code">
+<div
+class="code"
+onclick="
+localStorage.setItem(
+'selectedRestaurantOrderId',
+'${order.id}'
+);
+window.location.href=
+'restaurant-order.html';
+"
+>
 ${order.order_code}
 </div>
 
