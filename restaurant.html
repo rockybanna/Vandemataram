@@ -13,13 +13,35 @@
 body{
 font-family:Arial,sans-serif;
 background:#f5f5f5;
+margin:0;
 padding:15px;
 }
 
 .header{
 font-size:24px;
 font-weight:bold;
-margin-bottom:20px;
+margin-bottom:15px;
+}
+
+.tabs{
+display:flex;
+gap:8px;
+margin-bottom:15px;
+}
+
+.tab{
+flex:1;
+padding:10px;
+text-align:center;
+background:white;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.active{
+background:#ff6600;
+color:white;
 }
 
 .card{
@@ -34,6 +56,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.1);
 font-size:18px;
 font-weight:bold;
 color:#ff6600;
+cursor:pointer;
 }
 
 .btn{
@@ -55,14 +78,50 @@ background:#dc3545;
 color:white;
 }
 
-</style>
+.ready{
+background:#2196f3;
+color:white;
+}
 
+</style>
 </head>
 
 <body>
 
 <div class="header">
 Restaurant Orders
+</div>
+
+<div class="tabs">
+
+<div
+id="tab_pending"
+class="tab active"
+onclick="loadOrders('pending')">
+Pending
+</div>
+
+<div
+id="tab_accepted"
+class="tab"
+onclick="loadOrders('accepted')">
+Accepted
+</div>
+
+<div
+id="tab_ready"
+class="tab"
+onclick="loadOrders('ready')">
+Ready
+</div>
+
+<div
+id="tab_rejected"
+class="tab"
+onclick="loadOrders('rejected')">
+Rejected
+</div>
+
 </div>
 
 <div id="orders">
@@ -83,9 +142,19 @@ SUPABASE_URL,
 SUPABASE_ANON_KEY
 );
 
-loadOrders();
+loadOrders("pending");
 
-async function loadOrders(){
+async function loadOrders(status){
+
+document
+.querySelectorAll(".tab")
+.forEach(t=>t.classList.remove("active"));
+
+document
+.getElementById(
+"tab_" + status
+)
+.classList.add("active");
 
 const restaurantId =
 localStorage.getItem(
@@ -104,13 +173,13 @@ restaurantId
 "payment_status",
 "verified"
 )
-.in(
+.eq(
 "restaurant_status",
-["pending","accepted"]
+status
 )
-  .order(
+.order(
 "created_at",
-{ ascending:false }
+{ascending:false}
 );
 
 if(error){
@@ -123,7 +192,7 @@ if(!data.length){
 document.getElementById(
 "orders"
 ).innerHTML =
-"No Pending Orders";
+"No Orders";
 
 return;
 
@@ -145,8 +214,7 @@ localStorage.setItem(
 );
 window.location.href=
 'restaurant-order.html';
-"
->
+">
 ${order.order_code}
 </div>
 
@@ -161,15 +229,46 @@ ${order.customer_phone}
 </div>
 
 <div>
-Address:
-${order.customer_address}
-</div>
-
-<div style="margin-top:8px;">
 Grand Total:
 ₹${order.grand_total}
 </div>
 
+<div>
+Status:
+${order.restaurant_status}
+</div>
+
+${
+status==="accepted"
+?
+
+`
+<div>
+Prep Time:
+${order.prep_minutes || 0} mins
+</div>
+
+<button
+class="btn ready"
+onclick="
+markReady(
+'${order.id}'
+)
+">
+Mark Ready
+</button>
+`
+
+:
+
+""
+}
+
+${
+status==="pending"
+?
+
+`
 <button
 class="btn accept"
 onclick="
@@ -177,7 +276,7 @@ acceptOrder(
 '${order.id}'
 )
 ">
-Accept Order
+Accept
 </button>
 
 <button
@@ -187,8 +286,14 @@ rejectOrder(
 '${order.id}'
 )
 ">
-Reject Order
+Reject
 </button>
+`
+
+:
+
+""
+}
 
 </div>
 
@@ -198,16 +303,13 @@ Reject Order
 
 async function acceptOrder(orderId){
 
-const prepMinutes =
+const prep =
 prompt(
 "Preparation Time (10-45 mins)"
 );
 
-if(!prepMinutes){
-return;
-}
+if(!prep)return;
 
-const { error } =
 await db
 .from("orders")
 .update({
@@ -216,7 +318,7 @@ restaurant_status:
 "accepted",
 
 prep_minutes:
-parseInt(prepMinutes),
+parseInt(prep),
 
 accepted_at:
 new Date().toISOString()
@@ -227,13 +329,7 @@ new Date().toISOString()
 orderId
 );
 
-console.log(error);
-  
-alert(
-"Order Accepted"
-);
-
-loadOrders();
+loadOrders("pending");
 
 }
 
@@ -259,7 +355,10 @@ restaurant_status:
 "rejected",
 
 restaurant_rejection_reason:
-reason
+reason,
+
+rejected_at:
+new Date().toISOString()
 
 })
 .eq(
@@ -267,11 +366,29 @@ reason
 orderId
 );
 
-alert(
-"Order Rejected"
+loadOrders("pending");
+
+}
+
+async function markReady(orderId){
+
+await db
+.from("orders")
+.update({
+
+restaurant_status:
+"ready",
+
+ready_at:
+new Date().toISOString()
+
+})
+.eq(
+"id",
+orderId
 );
 
-loadOrders();
+loadOrders("accepted");
 
 }
 
