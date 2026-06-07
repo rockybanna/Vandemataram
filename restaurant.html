@@ -197,6 +197,7 @@ if(!prepMinutes){
 return;
 }
 
+const { error } =
 await db
 .from("orders")
 .update({
@@ -208,7 +209,7 @@ prep_minutes:
 parseInt(prepMinutes),
 
 accepted_at:
-new Date()
+new Date().toISOString()
 
 })
 .eq(
@@ -216,6 +217,8 @@ new Date()
 orderId
 );
 
+console.log(error);
+  
 alert(
 "Order Accepted"
 );
