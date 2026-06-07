@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Restaurant Order</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+padding:15px;
+}
+
+.card{
+background:white;
+padding:15px;
+margin-bottom:12px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.code{
+font-size:22px;
+font-weight:bold;
+color:#ff6600;
+}
+
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+margin-top:10px;
+cursor:pointer;
+font-size:16px;
+}
+
+.ready{
+background:#28a745;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="order">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+loadOrder();
+
+async function loadOrder(){
+
+const orderId =
+localStorage.getItem(
+"selectedRestaurantOrderId"
+);
+
+const { data:order } =
+await db
+.from("orders")
+.select("*")
+.eq("id",orderId)
+.single();
+
+const { data:items } =
+await db
+.from("order_items")
+.select("*")
+.eq("order_id",orderId);
+
+document.getElementById(
+"order"
+).innerHTML =
+
+`
+
+<div class="card">
+
+<div class="code">
+${order.order_code}
+</div>
+
+<br>
+
+<div>
+Customer:
+${order.customer_name}
+</div>
+
+<div>
+Phone:
+${order.customer_phone}
+</div>
+
+<div>
+Address:
+${order.customer_address}
+</div>
+
+<div>
+Distance:
+${order.distance_km} km
+</div>
+
+<br>
+
+<div>
+Item Total:
+₹${order.item_total}
+</div>
+
+<div>
+Delivery:
+₹${order.delivery_charge}
+</div>
+
+<div>
+Platform Fee:
+₹${order.platform_fee}
+</div>
+
+<div>
+Grand Total:
+₹${order.grand_total}
+</div>
+
+<br>
+
+<div>
+Prep Time:
+${order.prep_minutes || 0} mins
+</div>
+
+<div>
+Restaurant Status:
+${order.restaurant_status}
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Items</h3>
+
+${items.map(i => `
+
+<div>
+
+${i.item_name}
+
+x${i.quantity}
+
+- ₹${i.price}
+
+</div>
+
+`).join("")}
+
+</div>
+
+${
+order.restaurant_status === "accepted"
+
+?
+
+`
+
+<button
+class="btn ready"
+onclick="markReady()">
+
+Mark Ready
+
+</button>
+
+`
+
+:
+
+""
+}
+
+`;
+
+}
+
+async function markReady(){
+
+const orderId =
+localStorage.getItem(
+"selectedRestaurantOrderId"
+);
+
+const { error } =
+await db
+.from("orders")
+.update({
+
+restaurant_status:
+"ready",
+
+ready_at:
+new Date().toISOString()
+
+})
+.eq(
+"id",
+orderId
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+alert(
+"Order Ready For Pickup"
+);
+
+window.location.href =
+"restaurant.html";
+
+}
+
+</script>
+
+</body>
+</html>
