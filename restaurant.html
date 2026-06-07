@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Restaurant Orders</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+padding:15px;
+}
+
+.header{
+font-size:24px;
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.code{
+font-size:18px;
+font-weight:bold;
+color:#ff6600;
+}
+
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+margin-top:8px;
+cursor:pointer;
+}
+
+.accept{
+background:#28a745;
+color:white;
+}
+
+.reject{
+background:#dc3545;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+Restaurant Orders
+</div>
+
+<div id="orders">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+loadOrders();
+
+async function loadOrders(){
+
+const restaurantId =
+localStorage.getItem(
+"restaurant"
+);
+
+const { data , error } =
+await db
+.from("orders")
+.select("*")
+.eq(
+"restaurant_id",
+restaurantId
+)
+.eq(
+"payment_status",
+"verified"
+)
+.eq(
+"restaurant_status",
+"pending"
+)
+.order(
+"created_at",
+{ ascending:false }
+);
+
+if(error){
+console.log(error);
+return;
+}
+
+if(!data.length){
+
+document.getElementById(
+"orders"
+).innerHTML =
+"No Pending Orders";
+
+return;
+
+}
+
+document.getElementById(
+"orders"
+).innerHTML =
+data.map(order=>`
+
+<div class="card">
+
+<div class="code">
+${order.order_code}
+</div>
+
+<div>
+Customer:
+${order.customer_name}
+</div>
+
+<div>
+Phone:
+${order.customer_phone}
+</div>
+
+<div>
+Address:
+${order.customer_address}
+</div>
+
+<div style="margin-top:8px;">
+Grand Total:
+₹${order.grand_total}
+</div>
+
+<button
+class="btn accept"
+onclick="
+acceptOrder(
+'${order.id}'
+)
+">
+Accept Order
+</button>
+
+<button
+class="btn reject"
+onclick="
+rejectOrder(
+'${order.id}'
+)
+">
+Reject Order
+</button>
+
+</div>
+
+`).join("");
+
+}
+
+async function acceptOrder(orderId){
+
+const prepMinutes =
+prompt(
+"Preparation Time (10-45 mins)"
+);
+
+if(!prepMinutes){
+return;
+}
+
+await db
+.from("orders")
+.update({
+
+restaurant_status:
+"accepted",
+
+prep_minutes:
+parseInt(prepMinutes),
+
+accepted_at:
+new Date()
+
+})
+.eq(
+"id",
+orderId
+);
+
+alert(
+"Order Accepted"
+);
+
+loadOrders();
+
+}
+
+async function rejectOrder(orderId){
+
+const reason =
+prompt(
+"Reason For Rejection"
+);
+
+if(!reason){
+alert(
+"Reason Required"
+);
+return;
+}
+
+await db
+.from("orders")
+.update({
+
+restaurant_status:
+"rejected",
+
+restaurant_rejection_reason:
+reason
+
+})
+.eq(
+"id",
+orderId
+);
+
+alert(
+"Order Rejected"
+);
+
+loadOrders();
+
+}
+
+</script>
+
+</body>
+</html>
