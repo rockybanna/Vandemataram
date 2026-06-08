@@ -332,7 +332,8 @@ await db
 .from("orders")
 .update({
 delivery_status:"delivered",
-delivered_at:new Date().toISOString()
+delivered_at:new Date().toISOString(),
+completed_at:new Date().toISOString()
 })
 .eq("id",orderId);
 
