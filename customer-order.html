@@ -141,17 +141,74 @@ Status:
 <b>${order.payment_status}</b>
 </div>
 
-<button
-onclick="
-localStorage.setItem(
-'selectedOrderId',
-'${order.id}'
-);
-window.location.href=
-'customer-tracking.html';
-">
-Track Order
-</button>
+<br>
+
+<h3>Order Progress</h3>
+
+<div>
+
+${order.payment_status==="verified" ? "✅" : "⏳"}
+Payment Verified
+
+</div>
+
+<div>
+
+${order.restaurant_status==="accepted" ||
+order.restaurant_status==="ready"
+? "✅" : "⏳"}
+
+Restaurant Accepted
+
+</div>
+
+<div>
+
+${order.restaurant_status==="ready"
+? "✅" : "⏳"}
+
+Food Ready
+
+</div>
+
+<div>
+
+${["assigned","picked_up","out_for_delivery","delivered"]
+.includes(order.delivery_status)
+? "✅" : "⏳"}
+
+Delivery Assigned
+
+</div>
+
+<div>
+
+${["picked_up","out_for_delivery","delivered"]
+.includes(order.delivery_status)
+? "✅" : "⏳"}
+
+Picked Up
+
+</div>
+
+<div>
+
+${["out_for_delivery","delivered"]
+.includes(order.delivery_status)
+? "✅" : "⏳"}
+
+On The Way
+
+</div>
+
+<div>
+
+${order.delivery_status==="delivered"
+? "✅" : "⏳"}
+
+Delivered
+
+</div>
 
 ${
 order.rejection_reason
