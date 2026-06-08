@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Track Order</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+padding:15px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.step{
+padding:12px;
+margin-bottom:10px;
+border-radius:8px;
+background:#eee;
+}
+
+.done{
+background:#28a745;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Order Tracking</h2>
+
+<div id="tracking">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+loadTracking();
+
+async function loadTracking(){
+
+const orderId =
+localStorage.getItem(
+"selectedOrderId"
+);
+
+const { data:order } =
+await db
+.from("orders")
+.select("*")
+.eq("id",orderId)
+.single();
+
+let html = "";
+
+html += step(
+"Order Placed",
+true
+);
+
+html += step(
+"Payment Verified",
+order.payment_status==="verified"
+);
+
+html += step(
+"Restaurant Accepted",
+order.restaurant_status==="accepted" ||
+order.restaurant_status==="ready"
+);
+
+html += step(
+"Food Ready",
+order.restaurant_status==="ready"
+);
+
+html += step(
+"Delivery Assigned",
+order.delivery_status==="assigned" ||
+order.delivery_status==="picked_up" ||
+order.delivery_status==="out_for_delivery" ||
+order.delivery_status==="delivered"
+);
+
+html += step(
+"Picked Up",
+order.delivery_status==="picked_up" ||
+order.delivery_status==="out_for_delivery" ||
+order.delivery_status==="delivered"
+);
+
+html += step(
+"On The Way",
+order.delivery_status==="out_for_delivery" ||
+order.delivery_status==="delivered"
+);
+
+html += step(
+"Delivered",
+order.delivery_status==="delivered"
+);
+
+document.getElementById(
+"tracking"
+).innerHTML = html;
+
+}
+
+function step(text,done){
+
+return `
+
+<div class="
+step
+${done ? 'done' : ''}
+">
+
+${done ? '✅' : '⏳'}
+
+${text}
+
+</div>
+
+`;
+
+}
+
+</script>
+
+</body>
+</html>
