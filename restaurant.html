@@ -122,6 +122,13 @@ onclick="loadOrders('rejected')">
 Rejected
 </div>
 
+  <div
+id="tab_delivered"
+class="tab"
+onclick="loadOrders('delivered')">
+Delivered
+</div>
+
 </div>
 
 <div id="orders">
@@ -161,8 +168,31 @@ localStorage.getItem(
 "restaurant"
 );
 
-const { data , error } =
-await db
+let query;
+
+if(status==="delivered"){
+
+query =
+db
+.from("orders")
+.select("*")
+.eq(
+"restaurant_id",
+restaurantId
+)
+.eq(
+"delivery_status",
+"delivered"
+)
+.order(
+"completed_at",
+{ascending:false}
+);
+
+}else{
+
+query =
+db
 .from("orders")
 .select("*")
 .eq(
@@ -181,6 +211,11 @@ status
 "created_at",
 {ascending:false}
 );
+
+}
+
+const { data , error } =
+await query;
 
 if(error){
 console.log(error);
@@ -237,6 +272,28 @@ Grand Total:
 Status:
 ${order.restaurant_status}
 </div>
+
+${
+status==="delivered"
+?
+
+`
+<div>
+Completed:
+${new Date(
+order.completed_at
+).toLocaleString()}
+</div>
+
+<div style="color:green;font-weight:bold;">
+Delivered
+</div>
+`
+
+:
+
+""
+}
 
 ${
 status==="accepted"
