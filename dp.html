@@ -222,8 +222,24 @@ Amount:
 Delivery Status:
 ${order.delivery_status}
 
-${renderButtons(order)}
+${
+type==="completed"
+?
 
+`
+<br>
+Completed:
+${new Date(
+order.completed_at
+).toLocaleString()}
+`
+
+:
+
+""
+}
+
+${renderButtons(order)}
 </div>
 
 `).join("");
