@@ -141,6 +141,18 @@ Status:
 <b>${order.payment_status}</b>
 </div>
 
+<button
+onclick="
+localStorage.setItem(
+'selectedOrderId',
+'${order.id}'
+);
+window.location.href=
+'customer-tracking.html';
+">
+Track Order
+</button>
+
 ${
 order.rejection_reason
 ?
