@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Items Management</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.header{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.row{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.btn{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.back{
+background:#666;
+}
+
+.green{
+background:#28a745;
+}
+
+.blue{
+background:#2196f3;
+}
+
+.red{
+background:#dc3545;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.name{
+font-size:18px;
+font-weight:bold;
+margin-bottom:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Items Management
+</div>
+
+<div id="screen">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+const categoryId =
+localStorage.getItem(
+"adminCategoryId"
+);
+
+loadItems();
+
+async function loadItems(){
+
+const {data,error} =
+await db
+.from("items")
+.select("*")
+.eq(
+"category_id",
+categoryId
+)
+.order(
+"sort_order"
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById(
+"screen"
+).innerHTML =
+
+`
+
+<div class="row">
+
+<button
+class="btn back"
+onclick="history.back()">
+Back
+</button>
+
+<button
+class="btn green"
+onclick="addItem()">
+Add Item
+</button>
+
+</div>
+
+${data.map(i=>`
+
+<div class="card">
+
+<div class="name">
+${i.name}
+</div>
+
+<div>
+₹${i.price || 0}
+</div>
+
+<div>
+${i.description || ""}
+</div>
+
+<br>
+
+<button
+class="btn blue"
+onclick="
+editItem(
+'${i.id}',
+'${i.name}',
+${i.price || 0}
+)
+">
+Edit
+</button>
+
+<button
+class="btn red"
+onclick="
+deleteItem(
+'${i.id}'
+)
+">
+Delete
+</button>
+
+</div>
+
+`).join("")}
+
+`;
+
+}
+
+async function addItem(){
+
+const name =
+prompt("Item Name");
+
+if(!name)return;
+
+const price =
+prompt("Price");
+
+if(!price)return;
+
+const {error} =
+await db
+.from("items")
+.insert([{
+
+category_id:
+categoryId,
+
+name:
+name,
+
+price:
+Number(price),
+
+is_available:
+true
+
+}]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+loadItems();
+
+}
+
+async function editItem(
+id,
+oldName,
+oldPrice
+){
+
+const name =
+prompt(
+"Item Name",
+oldName
+);
+
+if(!name)return;
+
+const price =
+prompt(
+"Price",
+oldPrice
+);
+
+if(!price)return;
+
+const {error} =
+await db
+.from("items")
+.update({
+
+name:name,
+price:Number(price)
+
+})
+.eq(
+"id",
+id
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+loadItems();
+
+}
+
+async function deleteItem(id){
+
+if(
+!confirm(
+"Delete Item?"
+)
+)return;
+
+const {error} =
+await db
+.from("items")
+.delete()
+.eq(
+"id",
+id
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+loadItems();
+
+}
+
+</script>
+
+</body>
+</html>
