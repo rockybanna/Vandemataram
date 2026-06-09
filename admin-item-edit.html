@@ -119,6 +119,22 @@ onclick="saveItem()">
 Save Changes
 </button>
 
+<button
+type="button"
+onclick="openVariants()"
+style="
+background:#2196f3;
+color:white;
+border:none;
+padding:12px;
+border-radius:8px;
+margin-top:10px;
+width:100%;
+font-weight:bold;
+">
+Manage Variants & Addons
+</button>
+  
 </div>
 
 </div>
@@ -226,6 +242,18 @@ alert(
 
 }
 
+  function openVariants(){
+
+localStorage.setItem(
+"adminItemId",
+itemId
+);
+
+window.location.href =
+"admin-variants.html";
+
+}
+  
 </script>
 
 </body>
