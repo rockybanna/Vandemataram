@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Variants Management</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.header{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.row{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.btn{
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.back{
+background:#666;
+}
+
+.green{
+background:#28a745;
+}
+
+.blue{
+background:#2196f3;
+}
+
+.red{
+background:#dc3545;
+}
+
+.orange{
+background:#ff9800;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.name{
+font-size:18px;
+font-weight:bold;
+}
+
+.default{
+color:green;
+font-weight:bold;
+margin-top:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Variants Management
+</div>
+
+<div id="screen">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+const itemId =
+localStorage.getItem(
+"adminItemId"
+);
+
+loadVariants();
+
+async function loadVariants(){
+
+const {data,error} =
+await db
+.from("variants")
+.select("*")
+.eq(
+"item_id",
+itemId
+)
+.order(
+"sort_order"
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById(
+"screen"
+).innerHTML =
+
+`
+
+<div class="row">
+
+<button
+class="btn back"
+onclick="history.back()">
+Back
+</button>
+
+<button
+class="btn green"
+onclick="addVariant()">
+Add Variant
+</button>
+
+<button
+class="btn blue"
+onclick="
+window.location.href=
+'admin-addons.html';
+">
+Addons
+</button>
+
+</div>
+
+${data.map(v=>`
+
+<div class="card">
+
+<div class="name">
+${v.name}
+</div>
+
+<div>
+₹${v.price}
+</div>
+
+<div>
+Sort Order:
+${v.sort_order || 0}
+</div>
+
+${
+v.is_default
+?
+'<div class="default">DEFAULT</div>'
+:
+''
+}
+
+<br>
+
+<button
+class="btn orange"
+onclick="
+setDefault(
+'${v.id}'
+)
+">
+Set Default
+</button>
+
+<button
+class="btn blue"
+onclick="
+editVariant(
+'${v.id}',
+'${v.name}',
+${v.price},
+${v.sort_order || 0}
+)
+">
+Edit
+</button>
+
+<button
+class="btn red"
+onclick="
+deleteVariant(
+'${v.id}'
+)
+">
+Delete
+</button>
+
+</div>
+
+`).join("")}
+
+`;
+
+}
+
+async function addVariant(){
+
+const name =
+prompt(
+"Variant Name"
+);
+
+if(!name)return;
+
+const price =
+prompt(
+"Variant Price"
+);
+
+if(!price)return;
+
+const sort =
+prompt(
+"Sort Order",
+0
+);
+
+await db
+.from("variants")
+.insert([{
+
+item_id:itemId,
+
+name:name,
+
+price:Number(price),
+
+sort_order:Number(sort),
+
+is_default:false
+
+}]);
+
+loadVariants();
+
+}
+
+async function editVariant(
+id,
+oldName,
+oldPrice,
+oldSort
+){
+
+const name =
+prompt(
+"Variant Name",
+oldName
+);
+
+if(!name)return;
+
+const price =
+prompt(
+"Price",
+oldPrice
+);
+
+if(!price)return;
+
+const sort =
+prompt(
+"Sort Order",
+oldSort
+);
+
+await db
+.from("variants")
+.update({
+
+name:name,
+
+price:Number(price),
+
+sort_order:Number(sort)
+
+})
+.eq(
+"id",
+id
+);
+
+loadVariants();
+
+}
+
+async function deleteVariant(id){
+
+if(
+!confirm(
+"Delete Variant?"
+)
+)return;
+
+await db
+.from("variants")
+.delete()
+.eq(
+"id",
+id
+);
+
+loadVariants();
+
+}
+
+async function setDefault(id){
+
+await db
+.from("variants")
+.update({
+is_default:false
+})
+.eq(
+"item_id",
+itemId
+);
+
+await db
+.from("variants")
+.update({
+is_default:true
+})
+.eq(
+"id",
+id
+);
+
+loadVariants();
+
+}
+
+</script>
+
+</body>
+</html>
