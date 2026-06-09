@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Edit Item</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.card{
+background:white;
+padding:18px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+max-width:700px;
+margin:auto;
+}
+
+h1{
+margin-top:0;
+}
+
+label{
+display:block;
+margin-top:15px;
+font-weight:bold;
+}
+
+input,
+textarea,
+select{
+width:100%;
+padding:10px;
+margin-top:5px;
+border:1px solid #ccc;
+border-radius:8px;
+box-sizing:border-box;
+}
+
+textarea{
+height:100px;
+resize:vertical;
+}
+
+.row{
+display:flex;
+gap:10px;
+margin-top:20px;
+}
+
+.btn{
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+color:white;
+}
+
+.back{
+background:#666;
+}
+
+.save{
+background:#28a745;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Edit Item</h1>
+
+<label>Name</label>
+<input id="name">
+
+<label>Description</label>
+<textarea id="description"></textarea>
+
+<label>Price</label>
+<input id="price" type="number">
+
+<label>Image URL</label>
+<input id="image_url">
+
+<label>Sort Order</label>
+<input id="sort_order" type="number">
+
+<label>Availability</label>
+<select id="is_available">
+<option value="true">Available</option>
+<option value="false">Unavailable</option>
+</select>
+
+<div class="row">
+
+<button
+class="btn back"
+onclick="history.back()">
+Back
+</button>
+
+<button
+class="btn save"
+onclick="saveItem()">
+Save Changes
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+const itemId =
+localStorage.getItem(
+"adminItemId"
+);
+
+loadItem();
+
+async function loadItem(){
+
+const {data,error} =
+await db
+.from("items")
+.select("*")
+.eq("id",itemId)
+.single();
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById("name").value =
+data.name || "";
+
+document.getElementById("description").value =
+data.description || "";
+
+document.getElementById("price").value =
+data.price || 0;
+
+document.getElementById("image_url").value =
+data.image_url || "";
+
+document.getElementById("sort_order").value =
+data.sort_order || 0;
+
+document.getElementById("is_available").value =
+String(data.is_available);
+
+}
+
+async function saveItem(){
+
+const {error} =
+await db
+.from("items")
+.update({
+
+name:
+document.getElementById("name").value,
+
+description:
+document.getElementById("description").value,
+
+price:
+Number(
+document.getElementById("price").value
+),
+
+image_url:
+document.getElementById("image_url").value,
+
+sort_order:
+Number(
+document.getElementById("sort_order").value
+),
+
+is_available:
+document.getElementById(
+"is_available"
+).value === "true"
+
+})
+.eq(
+"id",
+itemId
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+alert(
+"Item Updated Successfully"
+);
+
+}
+
+</script>
+
+</body>
+</html>
