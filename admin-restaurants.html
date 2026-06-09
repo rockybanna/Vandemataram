@@ -179,7 +179,14 @@ r.is_active
 
 <button
 class="btn edit"
-onclick="editRestaurant('${r.id}')">
+onclick="
+localStorage.setItem(
+'adminRestaurantId',
+'${r.id}'
+);
+window.location.href=
+'admin-restaurant-edit.html';
+">
 Edit
 </button>
 
