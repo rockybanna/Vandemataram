@@ -220,28 +220,6 @@ loadRestaurants();
 
 }
 
-async function editRestaurant(id){
-
-const commission =
-prompt("Commission %");
-
-if(commission===null)return;
-
-await db
-.from("restaurants")
-.update({
-commission:
-parseInt(commission)
-})
-.eq(
-"id",
-id
-);
-
-loadRestaurants();
-
-}
-
 </script>
 
 </body>
