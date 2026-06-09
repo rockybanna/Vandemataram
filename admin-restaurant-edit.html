@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Edit Restaurant</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+padding:15px;
+margin:0;
+}
+
+.header{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+label{
+display:block;
+margin-top:12px;
+font-weight:bold;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:5px;
+border:1px solid #ccc;
+border-radius:8px;
+box-sizing:border-box;
+}
+
+.btn{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+margin-top:15px;
+cursor:pointer;
+font-size:16px;
+font-weight:bold;
+color:white;
+}
+
+.save{
+background:#28a745;
+}
+
+.back{
+background:#666;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+Edit Restaurant
+</div>
+
+<div class="card">
+
+<label>Name</label>
+<input id="name">
+
+<label>Commission %</label>
+<input id="commission" type="number">
+
+<label>Food Type</label>
+<select id="food_type">
+<option value="veg">Veg</option>
+<option value="nonveg">Non Veg</option>
+<option value="both">Both</option>
+</select>
+
+<label>Restaurant Code</label>
+<input id="code">
+
+<label>Open Time</label>
+<input id="open_time" type="time">
+
+<label>Close Time</label>
+<input id="close_time" type="time">
+
+<label>Status</label>
+<select id="is_active">
+<option value="true">Active</option>
+<option value="false">Inactive</option>
+</select>
+
+<button
+class="btn save"
+onclick="saveRestaurant()">
+Save Changes
+</button>
+
+<button
+class="btn back"
+onclick="window.location.href='admin-restaurants.html'">
+Back
+</button>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+const restaurantId =
+localStorage.getItem(
+"adminRestaurantId"
+);
+
+loadRestaurant();
+
+async function loadRestaurant(){
+
+const {data,error} =
+await db
+.from("restaurants")
+.select("*")
+.eq("id",restaurantId)
+.single();
+
+if(error){
+alert(error.message);
+return;
+}
+
+name.value =
+data.name || "";
+
+commission.value =
+data.commission || 0;
+
+food_type.value =
+data.food_type || "both";
+
+code.value =
+data.code || "";
+
+open_time.value =
+data.open_time || "";
+
+close_time.value =
+data.close_time || "";
+
+is_active.value =
+String(data.is_active);
+
+}
+
+async function saveRestaurant(){
+
+const {error} =
+await db
+.from("restaurants")
+.update({
+
+name:
+name.value,
+
+commission:
+parseInt(
+commission.value || 0
+),
+
+food_type:
+food_type.value,
+
+code:
+code.value,
+
+open_time:
+open_time.value,
+
+close_time:
+close_time.value,
+
+is_active:
+is_active.value==="true"
+
+})
+.eq(
+"id",
+restaurantId
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+alert(
+"Restaurant Updated"
+);
+
+window.location.href =
+"admin-restaurants.html";
+
+}
+
+</script>
+
+</body>
+</html>
