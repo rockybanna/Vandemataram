@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Menu Builder</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.header{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.btn{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.back{
+background:#666;
+}
+
+.green{
+background:#28a745;
+}
+
+.blue{
+background:#2196f3;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.title{
+font-size:18px;
+font-weight:bold;
+margin-bottom:5px;
+}
+
+.row{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Menu Builder
+</div>
+
+<div id="screen">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+let currentRestaurant=null;
+
+loadRestaurants();
+
+async function loadRestaurants(){
+
+const {data,error} =
+await db
+.from("restaurants")
+.select("*")
+.order("name");
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById("screen").innerHTML =
+
+`
+
+<div class="row">
+
+<button
+class="btn back"
+onclick="window.location.href='admin.html'">
+Back
+</button>
+
+</div>
+
+${data.map(r=>`
+
+<div class="card">
+
+<div class="title">
+${r.name}
+</div>
+
+<div>
+${r.food_type || "-"}
+</div>
+
+<br>
+
+<button
+class="btn blue"
+onclick="openRestaurant('${r.id}')">
+Open Menu
+</button>
+
+</div>
+
+`).join("")}
+
+`;
+
+}
+
+async function openRestaurant(id){
+
+currentRestaurant=id;
+
+const {data,error} =
+await db
+.from("categories")
+.select("*")
+.eq("restaurant_id",id)
+.order("sort_order");
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById("screen").innerHTML =
+
+`
+
+<div class="row">
+
+<button
+class="btn back"
+onclick="loadRestaurants()">
+Back
+</button>
+
+<button
+class="btn green"
+onclick="addCategory()">
+Add Category
+</button>
+
+</div>
+
+${data.map(c=>`
+
+<div class="card">
+
+<div class="title">
+${c.name}
+</div>
+
+<div>
+Sort Order:
+${c.sort_order || 0}
+</div>
+
+</div>
+
+`).join("")}
+
+`;
+
+}
+
+async function addCategory(){
+
+const name =
+prompt("Category Name");
+
+if(!name)return;
+
+const sort =
+prompt("Sort Order",0);
+
+const {error} =
+await db
+.from("categories")
+.insert([{
+restaurant_id:currentRestaurant,
+name:name,
+sort_order:Number(sort),
+is_active:true
+}]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+openRestaurant(currentRestaurant);
+
+}
+
+</script>
+
+</body>
+</html>
