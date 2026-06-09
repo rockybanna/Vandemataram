@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Restaurant Management</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.header{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.topbar{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.btn{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.back{
+background:#666;
+}
+
+.add{
+background:#28a745;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.name{
+font-size:18px;
+font-weight:bold;
+}
+
+.active{
+color:green;
+font-weight:bold;
+}
+
+.inactive{
+color:red;
+font-weight:bold;
+}
+
+.edit{
+background:#2196f3;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Restaurant Management
+</div>
+
+<div class="topbar">
+
+<button
+class="btn back"
+onclick="window.location.href='admin.html'">
+Back
+</button>
+
+<button
+class="btn add"
+onclick="addRestaurant()">
+Add Restaurant
+</button>
+
+</div>
+
+<div id="restaurants">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+loadRestaurants();
+
+async function loadRestaurants(){
+
+const {data,error} =
+await db
+.from("restaurants")
+.select("*")
+.order("name");
+
+if(error){
+console.log(error);
+return;
+}
+
+document.getElementById(
+"restaurants"
+).innerHTML =
+
+data.map(r=>`
+
+<div class="card">
+
+<div class="name">
+${r.name}
+</div>
+
+<br>
+
+<div>
+Code:
+${r.code || "-"}
+</div>
+
+<div>
+Commission:
+${r.commission || 0}%
+</div>
+
+<div>
+Food Type:
+${r.food_type || "-"}
+</div>
+
+<div class="${
+r.is_active
+?
+"active"
+:
+"inactive"
+}">
+${
+r.is_active
+?
+"ACTIVE"
+:
+"INACTIVE"
+}
+</div>
+
+<button
+class="btn edit"
+onclick="editRestaurant('${r.id}')">
+Edit
+</button>
+
+</div>
+
+`).join("");
+
+}
+
+async function addRestaurant(){
+
+const name =
+prompt("Restaurant Name");
+
+if(!name)return;
+
+const {error} =
+await db
+.from("restaurants")
+.insert([{
+name:name,
+is_active:true
+}]);
+
+if(error){
+alert(error.message);
+return;
+}
+
+loadRestaurants();
+
+}
+
+async function editRestaurant(id){
+
+const commission =
+prompt("Commission %");
+
+if(commission===null)return;
+
+await db
+.from("restaurants")
+.update({
+commission:
+parseInt(commission)
+})
+.eq(
+"id",
+id
+);
+
+loadRestaurants();
+
+}
+
+</script>
+
+</body>
+</html>
