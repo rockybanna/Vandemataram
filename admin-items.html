@@ -164,11 +164,12 @@ ${i.description || ""}
 <button
 class="btn blue"
 onclick="
-editItem(
-'${i.id}',
-'${i.name}',
-${i.price || 0}
-)
+localStorage.setItem(
+'adminItemId',
+'${i.id}'
+);
+window.location.href=
+'admin-item-edit.html';
 ">
 Edit
 </button>
