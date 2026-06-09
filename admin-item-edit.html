@@ -95,7 +95,51 @@ background:#28a745;
 
 <label>Image URL</label>
 <input id="image_url">
+  
+<label>Unit Value</label>
+<input id="unit_value">
 
+<label>Unit Type</label>
+<select id="unit_type">
+
+<option value="">
+Select Unit
+</option>
+
+<option value="pcs">
+pcs
+</option>
+
+<option value="gm">
+gm
+</option>
+
+<option value="kg">
+kg
+</option>
+
+<option value="ml">
+ml
+</option>
+
+<option value="ltr">
+ltr
+</option>
+
+<option value="plate">
+plate
+</option>
+
+<option value="bottle">
+bottle
+</option>
+
+<option value="pack">
+pack
+</option>
+
+</select>
+  
 <label>Sort Order</label>
 <input id="sort_order" type="number">
 
@@ -186,6 +230,12 @@ data.price || 0;
 document.getElementById("image_url").value =
 data.image_url || "";
 
+  document.getElementById("unit_value").value =
+data.unit_value || "";
+
+document.getElementById("unit_type").value =
+data.unit_type || "";
+
 document.getElementById("sort_order").value =
 data.sort_order || 0;
 
@@ -214,6 +264,12 @@ document.getElementById("price").value
 
 image_url:
 document.getElementById("image_url").value,
+
+  unit_value:
+document.getElementById("unit_value").value,
+
+unit_type:
+document.getElementById("unit_type").value,
 
 sort_order:
 Number(
