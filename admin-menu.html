@@ -190,8 +190,20 @@ ${data.map(c=>`
 
 <div class="card">
 
-<div class="title">
+<div
+class="title"
+style="cursor:pointer;color:#2196f3;"
+onclick="
+localStorage.setItem(
+'adminCategoryId',
+'${c.id}'
+);
+window.location.href=
+'admin-items.html';
+">
+
 ${c.name}
+
 </div>
 
 <div>
@@ -202,7 +214,6 @@ ${c.sort_order || 0}
 </div>
 
 `).join("")}
-
 `;
 
 }
