@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Addons Management</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+margin:0;
+padding:15px;
+}
+
+.header{
+font-size:28px;
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.row{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.btn{
+padding:12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.back{
+background:#666;
+}
+
+.green{
+background:#28a745;
+}
+
+.blue{
+background:#2196f3;
+}
+
+.red{
+background:#dc3545;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.name{
+font-size:18px;
+font-weight:bold;
+}
+
+.active{
+color:green;
+font-weight:bold;
+}
+
+.inactive{
+color:red;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+Addons Management
+</div>
+
+<div id="screen">
+Loading...
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://zozzoqzryejpkbddzoyi.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvenpvcXpyeWVqcGtiZGR6b3lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDMwNzIsImV4cCI6MjA5MTUxOTA3Mn0.RYQqP5mVTtga4Y1XsBTRs_o58Bj2gSLZ5Se6YMak-UE";
+
+const db =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
+
+const itemId =
+localStorage.getItem(
+"adminItemId"
+);
+
+loadAddons();
+
+async function loadAddons(){
+
+const {data,error} =
+await db
+.from("addons")
+.select("*")
+.eq(
+"item_id",
+itemId
+)
+.order(
+"sort_order"
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+document.getElementById(
+"screen"
+).innerHTML =
+
+`
+
+<div class="row">
+
+<button
+class="btn back"
+onclick="history.back()">
+Back
+</button>
+
+<button
+class="btn green"
+onclick="addAddon()">
+Add Addon
+</button>
+
+</div>
+
+${data.map(a=>`
+
+<div class="card">
+
+<div class="name">
+${a.name}
+</div>
+
+<div>
+₹${a.price}
+</div>
+
+<div>
+Sort Order:
+${a.sort_order || 0}
+</div>
+
+<div class="${
+a.is_active
+?
+'active'
+:
+'inactive'
+}">
+${
+a.is_active
+?
+'ACTIVE'
+:
+'INACTIVE'
+}
+</div>
+
+<br>
+
+<button
+class="btn blue"
+onclick="
+editAddon(
+'${a.id}',
+'${a.name}',
+${a.price},
+${a.sort_order || 0},
+${a.is_active}
+)
+">
+Edit
+</button>
+
+<button
+class="btn red"
+onclick="
+deleteAddon(
+'${a.id}'
+)
+">
+Delete
+</button>
+
+</div>
+
+`).join("")}
+
+`;
+
+}
+
+async function addAddon(){
+
+const name =
+prompt("Addon Name");
+
+if(!name)return;
+
+const price =
+prompt("Addon Price");
+
+if(!price)return;
+
+const sort =
+prompt(
+"Sort Order",
+0
+);
+
+await db
+.from("addons")
+.insert([{
+
+item_id:itemId,
+
+name:name,
+
+price:Number(price),
+
+sort_order:Number(sort),
+
+is_active:true
+
+}]);
+
+loadAddons();
+
+}
+
+async function editAddon(
+id,
+oldName,
+oldPrice,
+oldSort,
+oldActive
+){
+
+const name =
+prompt(
+"Addon Name",
+oldName
+);
+
+if(!name)return;
+
+const price =
+prompt(
+"Addon Price",
+oldPrice
+);
+
+if(!price)return;
+
+const sort =
+prompt(
+"Sort Order",
+oldSort
+);
+
+const active =
+confirm(
+"OK = Active\nCancel = Inactive"
+);
+
+await db
+.from("addons")
+.update({
+
+name:name,
+
+price:Number(price),
+
+sort_order:Number(sort),
+
+is_active:active
+
+})
+.eq(
+"id",
+id
+);
+
+loadAddons();
+
+}
+
+async function deleteAddon(id){
+
+if(
+!confirm(
+"Delete Addon?"
+)
+)return;
+
+await db
+.from("addons")
+.delete()
+.eq(
+"id",
+id
+);
+
+loadAddons();
+
+}
+
+</script>
+
+</body>
+</html>
