@@ -204,10 +204,23 @@ prompt("Price");
 
 if(!price)return;
 
+  const {data:cat} =
+await db
+.from("categories")
+.select("restaurant_id")
+.eq(
+"id",
+categoryId
+)
+.single();
+  
 const {error} =
 await db
 .from("items")
 .insert([{
+
+restaurant_id:
+cat.restaurant_id,
 
 category_id:
 categoryId,
@@ -219,10 +232,12 @@ price:
 Number(price),
 
 is_available:
-true
+true,
+
+sort_order:0
 
 }]);
-
+  
 if(error){
 alert(error.message);
 return;
