@@ -420,7 +420,7 @@ function addToCart(){
   let addonTotal = selectedAddons.reduce((a,b)=>a + b.price, 0);
 
 let total =
-selectedVariantPrice +
+(selectedVariantPrice || item.price) +
 addonTotal;
   
 let existing = cart.find(c =>
@@ -473,7 +473,7 @@ function goBack(){
   let addonTotal = selectedAddons.reduce((a,b)=>a + b.price, 0);
 
 let total =
-selectedVariantPrice +
+(selectedVariantPrice || base) +
 addonTotal;
     
   document.getElementById("total").innerText = "Total: ₹" + total;
