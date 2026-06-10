@@ -321,7 +321,8 @@ function selectCat(c){
   
 // CURRENT ITEM
 let currentItem = null;
-let selectedVariant = 0;
+let selectedVariantPrice = 0;
+let selectedVariantName = "";
 let selectedAddons = [];
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
   
@@ -331,7 +332,8 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 function openPopup(id){
 
   currentItem = id;
-  selectedVariant = 0;
+  selectedVariantPrice = 0;
+selectedVariantName = "";
   selectedAddons = [];
   
   let item = items.find(i => i.id == id);
@@ -350,7 +352,11 @@ document.getElementById("variants").innerHTML =
           +₹${x.price}
           <input type="radio" name="var"
             ${x.is_default ? "checked" : ""}
-            onclick="selectedVariant=${x.price}; updateTotal()">
+            onclick="
+selectedVariantPrice=${x.price};
+selectedVariantName='${x.name}';
+updateTotal()
+">
         </div>
       </div>
     `).join("")
@@ -359,7 +365,8 @@ document.getElementById("variants").innerHTML =
 // ✅ ADD THIS EXACTLY HERE
 let defaultVar = v.find(x => x.is_default) || v[0];
 if(defaultVar){
-  selectedVariant = defaultVar.price;
+selectedVariantPrice = defaultVar.price;
+selectedVariantName = defaultVar.name;
 }
   
   // ADDONS
@@ -412,11 +419,13 @@ function addToCart(){
   let item = items.find(i => i.id == currentItem);
   let addonTotal = selectedAddons.reduce((a,b)=>a + b.price, 0);
 
-  let total = item.price + selectedVariant + addonTotal;
-
+let total =
+selectedVariantPrice +
+addonTotal;
+  
 let existing = cart.find(c =>
   c.name === item.name &&
-  c.variant === selectedVariant &&
+  c.variant === selectedVariantName &&
   JSON.stringify(c.addons) === JSON.stringify(selectedAddons) &&
   c.resId === resId
 );
@@ -428,7 +437,8 @@ if(existing){
 cart.push({
   name: item.name,
   basePrice: item.price,
-  variant: selectedVariant,
+  variant: selectedVariantName,
+variantPrice: selectedVariantPrice,
   addons: selectedAddons,
   total: total,
   qty: 1,
@@ -462,8 +472,10 @@ function goBack(){
   let base = items.find(i => i.id == currentItem).price;
   let addonTotal = selectedAddons.reduce((a,b)=>a + b.price, 0);
 
-  let total = base + selectedVariant + addonTotal;
-
+let total =
+selectedVariantPrice +
+addonTotal;
+    
   document.getElementById("total").innerText = "Total: ₹" + total;
 }
   
