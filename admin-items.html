@@ -161,6 +161,29 @@ ${i.description || ""}
 
 <br>
 
+<div style="
+font-weight:bold;
+color:${i.is_available ? 'green' : 'red'};
+">
+${i.is_available ? '🟢 ACTIVE' : '🔴 INACTIVE'}
+</div>
+
+<br>
+
+<button
+class="btn"
+style="
+background:${i.is_available ? '#ff9800' : '#28a745'};
+"
+onclick="
+toggleItem(
+'${i.id}',
+${i.is_available}
+)
+">
+${i.is_available ? 'Disable' : 'Enable'}
+</button>
+
 <button
 class="btn blue"
 onclick="
@@ -277,6 +300,30 @@ await db
 name:name,
 price:Number(price)
 
+})
+.eq(
+"id",
+id
+);
+
+if(error){
+alert(error.message);
+return;
+}
+
+loadItems();
+
+}
+  async function toggleItem(
+id,
+current
+){
+
+const {error} =
+await db
+.from("items")
+.update({
+is_available:!current
 })
 .eq(
 "id",
